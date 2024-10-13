@@ -1,0 +1,35 @@
+from flask import Flask, render_template, request, jsonify
+import openai
+
+# Initialize Flask app
+app = Flask(__name__)
+
+# Set your OpenAI API key
+openai.api_key = "your-api-key-here"
+
+# Chatbot function using OpenAI API
+def chatbot(prompt):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are a helpful assistant."},
+                      {"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# Route for the homepage
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Route for handling chat requests
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get("message")
+    bot_response = chatbot(user_message)
+    return jsonify({"response": bot_response})
+
+if __name__ == "__main__":
+    app.run(debug=True)
